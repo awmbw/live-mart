@@ -27,6 +27,13 @@ git push -u origin main
 ```
 *(Replace YOUR_USERNAME with your GitHub username)*
 
+**⚠️ If you get "Could not resolve host: github.com" error:**
+- Check your internet connection
+- Try using GitHub Desktop app instead (easier GUI)
+- Try using SSH instead of HTTPS (see troubleshooting section)
+- Check if GitHub is blocked by firewall/VPN
+- Try: `git remote set-url origin git@github.com:YOUR_USERNAME/live-mart.git` (requires SSH key setup)
+
 ---
 
 ### STEP 2: Deploy Backend on Render (5 minutes) ⭐ RECOMMENDED (Free Tier Available)
@@ -174,6 +181,42 @@ git push -u origin main
 
 ## 🆘 Troubleshooting
 
+### GitHub Connection Error ("Could not resolve host: github.com")
+
+**Quick Fixes (try in order):**
+
+1. **Check Internet Connection:**
+   - Make sure you're connected to the internet
+   - Try opening https://github.com in your browser
+
+2. **Use GitHub Desktop (Easiest):**
+   - Download: https://desktop.github.com
+   - Open GitHub Desktop → File → Add Local Repository
+   - Select your project folder
+   - Click "Publish repository" button
+   - Much easier than command line!
+
+3. **Try Different DNS:**
+   ```bash
+   # Windows PowerShell (as Administrator)
+   ipconfig /flushdns
+   ```
+   - Or change DNS to Google DNS (8.8.8.8) or Cloudflare (1.1.1.1)
+
+4. **Use SSH Instead of HTTPS:**
+   - First, set up SSH key: https://docs.github.com/en/authentication/connecting-to-github-with-ssh
+   - Then use: `git remote set-url origin git@github.com:awmbw/live-mart.git`
+   - Try pushing again: `git push -u origin main`
+
+5. **Check Firewall/VPN:**
+   - Temporarily disable VPN if you're using one
+   - Check if your firewall is blocking GitHub
+   - Some corporate networks block GitHub
+
+6. **Alternative: Use GitLab or Bitbucket:**
+   - If GitHub is blocked, you can use GitLab (gitlab.com) or Bitbucket
+   - Render and Vercel support both platforms
+
 ### Backend Not Working?
 - Check Render logs: Service → Logs tab (or Fly.io: `fly logs`)
 - Verify environment variables are set
@@ -181,6 +224,18 @@ git push -u origin main
 - **Render free tier:** Services spin down after 15 min inactivity (first request may take 30-60 seconds)
 
 ### npm install Failed? (Exit Code 1)
+
+**Common Error: "ERESOLVE unable to resolve dependency tree"**
+- **Cause:** Package version conflicts (e.g., `react-google-login` requires React 16/17, but you have React 18)
+- **Fix:** Removed incompatible packages (`react-google-login`, `react-facebook-login`) from `package.json` - they weren't being used anyway
+- **Alternative:** If you need those packages, add to `package.json`:
+  ```json
+  "scripts": {
+    "build": "npm install --legacy-peer-deps && react-scripts build"
+  }
+  ```
+
+**Other fixes:**
 - **On Vercel:**
   - Make sure Root Directory is set to `client` (not `.`)
   - Check build logs for specific error message
@@ -190,10 +245,9 @@ git push -u origin main
   - Make sure Root Directory is set to `server` (not `.`)
   - Check service logs for specific error
   - Verify Node.js version in environment variables (NODE_VERSION = 18 or 20)
-- **Common fixes:**
+- **General:**
   - Delete `node_modules` and `package-lock.json` locally, then commit fresh `package-lock.json`
   - Make sure `react-scripts` is in `dependencies` (not `devDependencies`) for client
-  - Check if any packages are deprecated (like `react-google-login`)
 
 ### Frontend Not Connecting?
 - Check Vercel build logs
